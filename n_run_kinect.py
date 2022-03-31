@@ -24,9 +24,7 @@ from utils.downloads import attempt_download
 from utils.torch_utils import select_device
 from models.common import DetectMultiBackend
 
-
 VERBOSE = str(os.getenv('YOLOv5_VERBOSE', True)).lower() == 'true'  # global verbose mode
-
 
 center = (648, 488)
 
