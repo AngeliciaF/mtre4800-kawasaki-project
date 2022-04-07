@@ -1,0 +1,14 @@
+[Unit]
+Description=GRASP THE FUTURE ROBOT MODBUS MASTER
+After=multi-user.target
+
+[Service]
+Type=idle
+User=pi
+WorkingDirectory=/home/pi/Desktop/GRASP_THE_FUTURE/
+ExecStart=python3 /home/pi/Desktop/GRASP_THE_FUTURE/robot.py
+Restart=always
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
