@@ -287,9 +287,10 @@ while flag:
     lower_range = (100, 0, 0)
     upper_range = (120, 255, 255)
     # mask = cv2.inRange(gray, lower_range, upper_range)
-    lower = int(input("Lower: "))
-    upper = int(input("Upper: "))
-    mask = cv2.inRange(blurry, lower, upper)
+    # lower = int(input("Lower: "))
+    # upper = int(input("Upper: "))
+    # mask = cv2.inRange(blurry, lower, upper)
+    mask = cv2.inRange(blurry, 100, 155)
     # mask = cv2.inRange(blurry, 100, 155)
     # Black     *5-10,90            90,200          100,155
     # Orange    *70-75,110                  100,225 100,155
@@ -366,7 +367,7 @@ while flag:
     # cv2.imshow('New Contours Image', new_contours_image)
     # cv2.waitKey(0)
 
-    copy2 = rgb_image.copy()
+    final = rgb_image.copy()
     for boxes in targets_boxes:
         # Contours -> rectangle boundaries
         # bounds = cv2.minAreaRect(boxes)
@@ -375,7 +376,9 @@ while flag:
         # # Box corners -> int
         # box = np.int0(box)
         x1,x2,y1,y2 = boxes[0], boxes[1], boxes[0] + boxes[2], boxes[1] + boxes[3]
-        cv2.rectangle(copy2, (x1, x2), (y1, y2), (0, 255, 0), 2)
+        center = (int((x1+x2)/2), int((y1+y2)/2))
+        cv2.rectangle(final, (x1, x2), (y1, y2), (0, 255, 0), 2)
+        cv2.line(final, (int((x1+y1)/2),int((x2+y2)/2)), (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
 
     for bounds in targets_bounds:
         # Contours -> rectangle boundaries
@@ -386,12 +389,14 @@ while flag:
         box = np.int0(box)
         # x1,x2,y1,y2 = bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3]
         # Display regular bounding box
-        cv2.rectangle(copy2, (x1, x2), (y1, y2), (255, 0, 0), 2)
-        cv2.drawContours(copy2, [box], 0, (255, 255, 0), 2)
+        # cv2.rectangle(copy2, (x1, x2), (y1, y2), (255, 0, 0), 2)
+        # cv2.line(final, (int((box[0][0]+box[1][0])/2),int((box[1][1]+box[2][1])/2)), (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
+
+        cv2.drawContours(final, [box], 0, (255, 255, 0), 2)
 
     
     # cv2.imshow('Boxes', copy)
-    cv2.imshow('Boxes', copy2)
+    cv2.imshow('Boxes', final)
     # cv2.waitKey(0)
 
     # Draw and display all contours
