@@ -242,13 +242,15 @@ import numpy as np
 
 
 def contour_bounding_Rect(contour):
-    """Return a bounding box for a given contour."""
+    # Regular bounding box
+    # Contours -> rectangle box lengths
     x, y, w, h = cv2.boundingRect(contour)
     box = (x, y, w, h)
     return box
 
 def contour_min_Area_Rect(contour):
-    """Return a bounding box for a given contour."""
+    # Potentially rotated bounding box
+    # Contours -> rectangle boundaries
     bounds = cv2.minAreaRect(contour)
 #   min_box = (x, y, w, h)
     return bounds
@@ -266,10 +268,15 @@ while flag:
 
     # Let's load a simple image with 3 black squares
     rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
-    rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
-    
+
     if rgb_image is None:
         break
+
+    # TODO: Adjust these workspace/camera field of view boundaries
+    # rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
+    # left = int(input("Left: "))
+    # right = int(input("Right: "))
+    rgb_image = cv2.resize(rgb_image[300:3500,300:3500],(640, 480))
 
     # Grayscale
     gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
@@ -369,20 +376,13 @@ while flag:
 
     final = rgb_image.copy()
     for boxes in targets_boxes:
-        # Contours -> rectangle boundaries
-        # bounds = cv2.minAreaRect(boxes)
-        # # Rectangle boundaries -> Box
-        # box = cv2.boxPoints(bounds)
-        # # Box corners -> int
-        # box = np.int0(box)
+
         x1,x2,y1,y2 = boxes[0], boxes[1], boxes[0] + boxes[2], boxes[1] + boxes[3]
         center = (int((x1+x2)/2), int((y1+y2)/2))
         cv2.rectangle(final, (x1, x2), (y1, y2), (0, 255, 0), 2)
         cv2.line(final, (int((x1+y1)/2),int((x2+y2)/2)), (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
 
     for bounds in targets_bounds:
-        # Contours -> rectangle boundaries
-        # bounds = cv2.minAreaRect(bounds)
         # Rectangle boundaries -> Box
         box = cv2.boxPoints(bounds)
         # Box corners -> int
