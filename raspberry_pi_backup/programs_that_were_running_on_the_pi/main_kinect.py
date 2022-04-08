@@ -83,7 +83,8 @@ class DetectMultiBackend(nn.Module):
             #     self.forward(im)  # warmup
 
 # Start the video server
-threading.Thread(target=lambda: flask.main()).start()
+# TODO: Uncomment
+# threading.Thread(target=lambda: flask.main()).start()
 
 # Get predictions from class
 #model = AIModel((1296,976), 440)
@@ -93,6 +94,7 @@ yolo_model = Yolov5Model()
 
 weights = 'mtre4800-kawasaki-project/best.pt'
 device = torch.device('cpu') # TODO: Use the select_device()
+print("Main")
 
 # Load the ML model
 # model = torch.hub.load('ultralytics/yolov5', 'custom', path='mtre4800-kawasaki-project/best.pt')  # local model
@@ -101,7 +103,8 @@ device = torch.device('cpu') # TODO: Use the select_device()
 # TODO: Set the heights from the Kinect distance program here
 # TODO: Add the bucket height
 # FIXME Ask Tim: Which is which? ['black', 'amazon', 'clear', 'styro', 'null']?
-# From 24 in from the ground (tallest container)
+# Order of heights are based on the training/labelling order
+# From 24 in. from the ground (tallest container can be 24 in. in the future with this method)
 heights = [-254, -374, -343, -275, 0]
 # heights = [-254, -275, bucket, 0]
 
@@ -111,19 +114,17 @@ template = template[60:480,70:610]
 template = cv2.resize(template, (160,120))
 
 scada = {'robot_tags':{'home':True}}
-predicted_labels = 4
-
-# TODO: Make Kinect camera
-# cam = cameraInterface.Camera()
+prediction = 3 #4
 
 # while True:
 # while rgb_image:
+    # rgb_image, _ = freenect.sync_get_video()
 frame = 0
 for frame in range(0, 100):
     # Get the RGB image from the Kinect
     # TODO: Uncomment for live Kinect video feed
     # rgb_image, _ = freenect.sync_get_video()
-    rgb_image = cv2.imread('mtre4800-kawasaki-project/three_containers1.jpg')
+    rgb_image = cv2.imread('mtre4800-kawasaki-project/three_containers4.jpg')
     rgb_image = cv2.resize(rgb_image, (640, 480))
     frame += 1
 
@@ -135,43 +136,58 @@ for frame in range(0, 100):
 
     # FIXME: Work on this
     # TODO: Convert this, too
-    payloads = segmentation.getPayloads(rgb_image)
+    payloads, bounding_box = segmentation.getPayloads(rgb_image)
+
+    print("Length of payloads:", len(payloads))
     
-    bounding_box = None
+    # bounding_box = None
     x = 0
     y = 0
     selected = 0
     for index, payload in enumerate(payloads):
-        if payload.selected:
+        # FIXME: 2 AsK Tim: How does payload.selected work? Is it the box the gripper is going to pick up next?
+        #                   Maybe remove since payloads are already checked
+        # if payload.selected:
+        if True:
             selected = index
-            bounding_box, sample = segmentation.getPayload(payload, rgb_image)
+            # bounding_box, sample = segmentation.getPayload(payload, rgb_image)
+            sample = segmentation.get_sample(payload, rgb_image)
             if scada['robot_tags']['home']:
+                # Get 1 prediction at a time
+
+                # FIXME: 2 Ask Tim: Does this just return the 1st prediction even if there are multiple boxes?
+                prediction = yolo_model.getPrediction(yolo_model.model, rgb_image, payload, selected)
                 # prediction = model.getPrediction(sample, payload)
-                predicted_labels = yolo_model.getPrediction(yolo_model.model, sample, payload)
                 payload.z = heights[payload.type]
             else:
-                payload.type = predicted_labels
+                # Not at home, so no prediction
+                payload.type = prediction
                 payload.z = heights[payload.type]
-            x, y = segmentation.convert_units(payload.x, payload.y, img.shape)
+            x, y = segmentation.convert_units(payload.x, payload.y, rgb_image.shape)
 
     if scada['robot_tags']['home']:
-        segmentation.draw_payloads(img, payloads, bounding_box, yolo_model.labels)
+        segmentation.draw_payloads(rgb_image, payloads, bounding_box, yolo_model.labels)
 
     tag_set = Payload().tags()
     if len(payloads) > 0:
+        # FIXME: 2 Ask Tim: Why are these not in a for loop?
         payloads[selected].x = x
         payloads[selected].y = y
-        cv2.putText(img, "X: " + str(round(payloads[selected].x,0)) + 'mm', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
-        cv2.putText(img, "Y: " + str(round(payloads[selected].y,0)) + 'mm', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+        cv2.putText(rgb_image, "X: " + str(round(payloads[selected].x,0)) + 'mm', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+        cv2.putText(rgb_image, "Y: " + str(round(payloads[selected].y,0)) + 'mm', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
         tag_set = deepcopy(payloads[selected].tags())
+
     tag_set['number_of_payloads'] = len(payloads)
 
     scada = messaging_kinect.client_send('vision', tag_set, True)
     #print(scada['scada_tags'])
+
+
+    # Push image to video server
     img = cv2.resize(img,(648,488))
     flask.push(img)
-    cv2.imshow("frame", img)
+    cv2.imshow("final", img)
     #if (cv2.waitKey(1) & 0xFF) == 27:
     #    break
 

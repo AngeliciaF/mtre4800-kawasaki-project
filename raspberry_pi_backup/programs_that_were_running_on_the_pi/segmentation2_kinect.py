@@ -3,6 +3,7 @@ import time
 from time import time as now
 import cv2
 import numpy as numpy
+import numpy as np
 from payload_kinect import Payload
 from Yolov5Model import Yolov5Model
 
@@ -24,79 +25,88 @@ def perspective(img):
     img = cv2.warpPerspective(img,M,(img.shape[1], img.shape[0]),flags=cv2.INTER_LINEAR)
     return img
 
+def get_sample(payload, image, hsize=180):
+    # Sample is here now to condense functions (getPayload())
+    image = cv2.resize(image[300:3500,300:3500],(640, 480))
+
+    center = (payload.x, payload.y)
+    center = adjust_sample_center(center, image.shape, hsize)
+    pt1 = (center[0]-hsize, center[1]-hsize)
+    pt2 = (center[0]+hsize, center[1]+hsize)
+    sample = image[pt1[1]:pt2[1],pt1[0]:pt2[0]]
+    return sample
+
 # Get payloads and return payloads
 def getPayloads(image):
     # FIXME: Ask Tim: Are these the appoximate dimensions of the work space?
     # TODO: Once the Kinect is mounted, recalcuate/measure this work area boundary
-
     # image = cv2.resize(img[130:930,150:1200],(162,122))
     # image = cv2.resize(img[100:900,100:1000],(640,480))
     image = cv2.resize(image, (640,480))
-    # image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    # cv2.imshow("image", image)
-    # cv2.waitKey(0)
+    # image = cv2.resize(image[300:3500,300:3500],(640, 480))
+
+    # cv2.imshow("Image", image)
+    # cv2.waitKey(2000)
+    
+    print("Image shape:", image.shape)
+
+    # Grayscale image
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Blur image
+    blurry = cv2.GaussianBlur(gray,(9,9), 2)
 
     # FIXME: Ask Tim: Why blue/gray? What is the blue/gray range used for?
     # lower_blue = numpy.array([40, 30, 30])
-    lower = numpy.array([85,85,85])
+    # lower = numpy.array([85,85,85])
     # upper_blue = numpy.array([150, 150, 190])
     # upper = numpy.array([170, 170, 190])
-    upper = numpy.array([170, 170, 190])
-    image = cv2.inRange(image, lower, upper)
-    # cv2.imshow("image0", image)
+    lower = 100
+    upper = 155
+    mask = cv2.inRange(blurry, lower, upper)
+
+    # cv2.imshow('Mask', mask)
     # cv2.waitKey(0)
 
-    image = cv2.GaussianBlur(image,(9,9), 4)
-    # cv2.imshow("image1", image)
-    # cv2.waitKey(0)
-    _, image = cv2.threshold(image, 70, 255, cv2.THRESH_BINARY_INV)
-    contours,_ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    # contours1,_ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    # contours2,_ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # Find Canny edges
+    # edged = cv2.Canny(mask, 100, 200)
+
+    # Invert 
+    _, inv_image = cv2.threshold(mask, 70, 255, cv2.THRESH_BINARY_INV)
+
+    # cv2.imshow('Mask/Inv', np.vstack([mask,inv_image]))
+    # cv2.waitKey(2000)
+
+    contours, _ = cv2.findContours(inv_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    print("Number of Contours found = " + str(len(contours)))
+
+    copy = image.copy()
+    contours_image = cv2.drawContours(copy, contours, -1, (255,0,255), 2)
+
+    # TODO: Refine area
+    # Check area of contours to refine payload detection
+    # TODO: Adjust contourArea threshold
+    refined_contours = []
+    for c in contours:
+        contour_area = cv2.contourArea(c)
+        if contour_area >= 9000 and contour_area <= 31000:
+            refined_contours.append(c)
+
+    print("Number of New Contours found = " + str(len(refined_contours)))
+
+    copy1 = image.copy()
+    new_contours_image = cv2.drawContours(copy1, refined_contours, -1, (255,0,0), 2)
     
-    # contours1 = contours1[0].reshape(-1,2)
-    # contours2 = contours2[0].reshape(-1,2)
-    # img1 = image.copy()
-    # img2 = image.copy()
-
-    # Check area of contours
-    new_contours = [c for c in contours if cv2.contourArea(c) >= 2000]
-    
-    for c in new_contours:
-        x,y,w,h = cv2.boundingRect(c)
-        b = (x,y,w,h)
-        cv2.rectangle(image, (b[0], b[1]), (b[0] + b[2], b[1] + b[3]), (0, 255, 0), 2)
-
-        # boxes = [cv2.boundingRect(c) for c in new_contours]
-        # boxes = (x,y,w,h)
-
-    # for (x, y) in contours1:
-    #     cv2.circle(img1, (x, y), 1, (255, 0, 0), 3)
-
-    # for (x, y) in contours2:
-    #     cv2.circle(img2, (x, y), 1, (255, 0, 0), 3)
-
-    # cv2.imshow("img1", img1)
-    # cv2.waitKey(0)
-    # cv2.imshow("img2", img2)
-    # cv2.waitKey(0)
-    # x,y,w,h = cv2.boundingRect(new_contours)
-    # box = (x,y,w,h)
-
-    # cv2.imshow("image2", image)
-    # cv2.waitKey(0)
-
-
-    cv2.drawContours(image, new_contours,-1,(255,0,0),3)
-    cv2.imshow("image3", image)
-    cv2.waitKey(0)
+    cv2.imshow('Contours_image/New_contours_image', np.hstack([contours_image,new_contours_image]))
+    cv2.waitKey(2000)
 
     center = (0,0)
     selected = -1
     payloads = []
+    bounding_box = []
     index = 0
     count = 0
-    for contour in contours:
+    for contour in refined_contours:
         count += 1
         print("count:", count)
         # Contours -> rectangle boundaries
@@ -105,6 +115,7 @@ def getPayloads(image):
         box = cv2.boxPoints(bounds)
         # Box corners -> int
         box = numpy.int0(box)
+        bounding_box.append(box)
 
         # Subtract old center x from width/2
         oc_dx = abs(center[0]-(image.shape[1]/2))
@@ -121,38 +132,43 @@ def getPayloads(image):
         # Calculate new distance
         new_distance = math.sqrt(nc_dx**2+nc_dy**2)
 
-        if check_size_low(bounds):
-            new_payload = Payload()
-            new_payload.bounds = bounds
-            new_payload.x = int((new_center[0]*6.481)+150)
-            new_payload.y = int((new_center[1]*6.557)+130)
-            new_payload.r = reference_rotation(bounds)
-            new_payload.distance = new_distance*6.5
-            payloads.append(new_payload)
+        # if check_size_low(bounds):
+        new_payload = Payload()
+        new_payload.bounds = bounds
+        # FIXME: 2 Ask Tim: What are 6.481, 6.557, and 6.5?
+        new_payload.x = int((new_center[0]*6.481)+150)
+        new_payload.y = int((new_center[1]*6.557)+130)
+        new_payload.r = reference_rotation(bounds)
+        # FIXME: 2 Ask Tim: Is this the distance from the center of the gripper
+        #                   to the center of the container?
+        new_payload.distance = new_distance*6.5 ###
+        payloads.append(new_payload)
 
-            if new_distance < old_distance:
-                selected = index
-                center = new_center
-            index += 1
+        if new_distance < old_distance:
+            selected = index
+            center = new_center
+        index += 1
     
+    # TODO: Understand this
     if len(payloads) > 0:
         payloads[selected].selected = 1
 
-    cv2.imshow("imagelast", image)
-    cv2.waitKey(0)
-    return payloads
+    # cv2.imshow("imagelast", image)
+    # cv2.waitKey(0)
+    # box is used in drawpayload
+    return payloads, bounding_box
 
 # FIXME: Work on this (Get bounding boxes then Draw the payloads on the image)
 # Add getPayload and draw payloads to the test code at the bottom
 # Returns bounding boxes and image sample
-def getBoundingBox(payload, image, hsize=180):
-    center = (payload.x, payload.y)
+def getBoundingBox(center, frame, hsize=180): #payload
+    # center = (payload.x, payload.y)
     # FIXME: Ask Tim: Can you explain this?
-    center = adjust_sample_center(center, image.shape, hsize)
+    # center = adjust_sample_center(center, image.shape, hsize)
     pt1 = (center[0]-hsize, center[1]-hsize)
     pt2 = (center[0]+hsize, center[1]+hsize)
-    sample = image[pt1[1]:pt2[1],pt1[0]:pt2[0]]
-    sample_template = image[pt1[1]:pt2[1],pt1[0]:pt2[0]]
+    sample = frame[pt1[1]:pt2[1],pt1[0]:pt2[0]]
+    sample_template = frame[pt1[1]:pt2[1],pt1[0]:pt2[0]]
 
     [tR, tG, tB] = cv2.split(sample_template)
     [iR, iG, iB] = cv2.split(sample)
@@ -171,8 +187,8 @@ def getBoundingBox(payload, image, hsize=180):
     difference = cv2.cvtColor(difference,cv2.COLOR_BGR2GRAY)
     
     k_size = 15
-    kernelmatrix = numpy.ones((k_size, k_size), numpy.uint8)
-    # TODO: fix black boxes dilate add more white pixel around other white pixels based on k_size
+    kernelmatrix = np.ones((k_size, k_size), np.uint8)
+    # TODO: Fix black boxes dilate add more white pixel around other white pixels based on k_size
     d = cv2.dilate(difference, kernelmatrix)
     
     fuzzy = cv2.GaussianBlur(d, (9,9), 4)
@@ -184,14 +200,14 @@ def getBoundingBox(payload, image, hsize=180):
         bounds = cv2.minAreaRect(contour)
         # if circle
             # bounds[2]
-        if check_size_hi(bounds):
-            targets.append(bounds)
+        # if check_size_hi(bounds):
+        targets.append(bounds)
     
     if len(targets) > 0:
-        if len(targets) > 1:
-            target = checkOverlap(targets)
-        else:
-            target = targets[0]
+        # if len(targets) > 1:
+        #     target = checkOverlap(targets)
+        # else:
+        #     target = targets[0]
     
         adjusted_center = (target[0][0] + pt1[0], target[0][1] + pt1[1])
         payload.x = int(adjusted_center[0])
@@ -199,7 +215,7 @@ def getBoundingBox(payload, image, hsize=180):
         payload.r = reference_rotation(target)
         target = (adjusted_center,target[1],target[2])
         box = cv2.boxPoints(target)
-        box = numpy.int0(box)
+        box = np.int0(box)
         return box, sample
     else:
         return None, sample
@@ -292,28 +308,30 @@ def checkOverlap(targets):
             selection = index
     return targets[selection]
 
-def draw_payloads(img, payloads, bounding_box, labels):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+def draw_payloads(image, payloads, bounding_box, labels):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     for index, payload in enumerate(payloads):
         print("draw payloads.selected:", payload.selected)
         center = (payload.x, payload.y)
         color = (0,0,255)
         # font_color = (0,0,0)
-        if payload.selected:
+        # if payload.selected:
+        if True:
             center = (payload.x, payload.y)
             color = (0,255,0)
             if bounding_box is not None:
-                cv2.drawContours(img, [bounding_box], 0, color, 2)
+                # cv2.drawContours(img, [bounding_box], 0, color, 2)
+                cv2.drawContours(image, [bounding_box[index]], 0, (255, 255, 0), 2)
             print("center:", center)
-        img = cv2.circle(img,center,4,color,3)
+        image = cv2.circle(image,center,4,color,3)
         # cv2.rectangle(img, (center[0]+7, center[1]-100), (center[0]+240, center[1]+80), (255,255,255), -1)
         # cv2.putText(img, "D: " + str(round(payload.distance,0))+'px', (center[0]+10, center[1]-60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
         # cv2.putText(img, "X: " + str(round(payload.x,0)) + 'px', (center[0]+10, center[1]-30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
         # cv2.putText(img, "Y: " + str(round(payload.y,0)) + 'px', (center[0]+10, center[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
         # cv2.putText(img, "R: " + str(round(payload.r,0)) + 'deg', (center[0]+10, center[1]+30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
         # cv2.putText(img, labels[payload.type], (center[0]+10, center[1]+60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
-        cv2.line(img, (int(img.shape[1]/2),int(img.shape[0]/2)), center, color, 1)
-    cv2.imshow("final", img)
+        cv2.line(image, (int(image.shape[1]/2),int(image.shape[0]/2)), center, color, 1)
+    cv2.imshow("Draw Payloads", image)
     cv2.waitKey(0)
 
 # if __name__ == "__main__":
@@ -322,6 +340,8 @@ def draw_payloads(img, payloads, bounding_box, labels):
 # ADD Payload.selected here
 # def main(self):
 
+# Test seg code
+'''
 heights = [-254, -374, -343, -275, 0]
 
 scada = {'robot_tags':{'home':True}}
@@ -343,7 +363,7 @@ x = 0
 y = 0
 selected = 0
 for index, payload in enumerate(payloads):
-    print("payload.selected", payload.selected)
+    # print("payload.selected", payload.selected)
     if payload.selected:
         selected = index
         # cv2.imshow("rgb_image", rgb_image)
@@ -366,6 +386,6 @@ print("getPrediction:", predicted_labels)
 
 if scada['robot_tags']['home']:
     draw_payloads(rgb_image, payloads, bounding_box, yolo_model.labels)
-
+'''
 
 

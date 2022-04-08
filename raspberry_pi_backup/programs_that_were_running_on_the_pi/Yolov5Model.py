@@ -47,30 +47,29 @@ class Yolov5Model:
         # self.interpreter.allocate_tensors()
 
         # TODO: Load the model here?
-        # self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='ml_files/best.pt')  # local model
+        self.model = torch.hub.load('ultralytics/yolov5', 'custom', path='ml_files/best.pt')  # local model
 
         # # Set custom inference settings
-        # self.model.agnostic = False            # NMS class-agnostic - Model uses the foreground to create bounding boxes instead of classes (pre-processor)
-        # # self.model.amp = False               # Automatic Mixed Precision (AMP) inference - If True, Applicable calculations are computed in 16-bit precision instead of 32-bit precision
-        # self.model.amp = True                  # Speeds up inference process
-        # self.model.classes = None              # (optional list) Filter by class, i.e. = [0, 15, 16] for COCO persons, cats and dogs
-        # self.model.conf = 0.60                 # NMS confidence threshold - Confidence value that the bounding box contains an object (Max = 1)
-        # self.model.dmb = True                  # 
-        # self.model.dump_patches = False        # 
-        # self.model.iou = 0.45                  # NMS IoU threshold - Bounding box overlap threshold
-        # self.model.max_det = 6                 # Maximum number of detections per image
-        # self.model.multi_label = False         # NMS multiple labels per box
-        # self.model.names = ['black_box', 'orange_bucket', 'styrofoam_box', 'null']         # Names of containers
-        # self.model.pt = True                   # Use ML model weights that are the .pt format
-        # self.model.stride = 32                 # 
-        # self.model.training = True             # 
+        self.model.agnostic = False            # NMS class-agnostic - Model uses the foreground to create bounding boxes instead of classes (pre-processor)
+        # self.model.amp = False               # Automatic Mixed Precision (AMP) inference - If True, Applicable calculations are computed in 16-bit precision instead of 32-bit precision
+        self.model.amp = True                  # Speeds up inference process
+        self.model.classes = None              # (optional list) Filter by class, i.e. = [0, 15, 16] for COCO persons, cats and dogs
+        self.model.conf = 0.60                 # NMS confidence threshold - Confidence value that the bounding box contains an object (Max = 1)
+        self.model.dmb = True                  # 
+        self.model.dump_patches = False        # 
+        self.model.iou = 0.45                  # NMS IoU threshold - Bounding box overlap threshold
+        self.model.max_det = 6                 # Maximum number of detections per image
+        self.model.multi_label = False         # NMS multiple labels per box
+        self.model.names = ['black_box', 'orange_bucket', 'styrofoam_box', 'null']         # Names of containers
+        self.model.pt = True                   # Use ML model weights that are the .pt format
+        self.model.stride = 32                 # 
+        self.model.training = True             # 
 
         # self.labels = ['black', 'amazon', 'clear', 'styro', 'null']
-        # self.labels = ['black_box', 'styrofoam_box', 'orange_bucket', 'null']
         self.labels = ['black_box', 'orange_bucket', 'styrofoam_box', 'null']
 
     # def getPrediction(self, model, image, payload):
-    def getPrediction(self, model, image, payload):
+    def getPrediction(self, model, image, payload, selected):
         # sample = Image.fromarray(image).convert('L').resize(self.size, Image.ANTIALIAS)
         # common.set_input(self.interpreter, sample)
         # self.interpreter.invoke()
@@ -78,9 +77,14 @@ class Yolov5Model:
         # prediction = classes[0].id
         # payload.type = prediction
         # model = torch.hub.load('ultralytics/yolov5', 'custom', path='ml_files/best.pt')  # local model
-
-        image = cv2.resize(image, (224, 192))
+        
+        image = cv2.resize(image[300:3500,300:3500],(640, 480))
+        # image = cv2.resize(image, (224, 192))
         # image = cv2.resize(image, (640, 480))
+
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        x_shape, y_shape = image.shape[1], image.shape[0]
 
         # Stuff for FPS text on image
         # font = cv2.FONT_HERSHEY_SIMPLEX
@@ -92,14 +96,15 @@ class Yolov5Model:
         # Set start time for FPS calculations
         start_time = time.time()
 
-        # Choose custom inference size
-        results = model(image, size=224) # 640, 416, 360, 224, 160
+        # Choose custom inference size and save test results
+        results = model(image, size=640) # 640, 416, 224, 360, 160
 
-        # Save the arrays of labels and the bounding box coordinates
+        # Save the array of labels and the bounding box coordinates
         predicted_labels = results.xyxyn[0][:, -1].numpy()
         cord_thres = results.xyxyn[0][:, :-1].numpy()
 
         print("predicted_labels:", predicted_labels)
+        print("Bounding Boxes Coordinates:\n", cord_thres)
 
         # Display the results in the terminal
         print("\nConcise Inference Results:")
@@ -115,7 +120,7 @@ class Yolov5Model:
         print(f'FPS: {fps}\n')
 
         # Get prediction/s
-        if len(predicted_labels) != 0:
+        # if len(predicted_labels) != 0:
             # TODO: This may just print the 1st element every time
             # TODO: Make sure payload.type is correct
             # Convert predicted class labels (numeric) to readable labels
@@ -132,9 +137,48 @@ class Yolov5Model:
             #         # return predicted_labels[i]
             #     else:
             #         print("An error occurred!")
-            return predicted_labels
+        #     return predicted_labels
+        # else:
+        #     print("No containers were found!")
+        #     return 3
+
+        if len(predicted_labels) != 0:
+            # Convert predicted class labels (numeric) to readable labels
+            for i in range(len(predicted_labels)):
+                row = cord_thres[i]
+                confidence = row[4]
+                # If the confidence is > 0.6, predict_labels
+                if confidence >= 0.6:
+                    if predicted_labels[i] == 0:
+                        # color = (255, 0, 0)
+                        # label = "Black Box"
+                        print("Black, plastic box was found!\n")
+                    elif predicted_labels[i] == 1:
+                        # color = (0, 255, 0)
+                        # label = "Orange Bucket"
+                        print("Orange, plastic bucket was found!\n")
+                    elif predicted_labels[i] == 2:
+                        # color = (0, 0, 255)
+                        # label = "White Box"
+                        print("White, Styrofoam box was found!\n")
+                    else:
+                        print("An error occurred!\n")
+                    # payload.type = predicted_labels[selected]
+                    payload.type = int(predicted_labels[i])
+
+                    # Info to draw regular bounding box
+                    # x1, x2, y1, y2 = int(row[0]*x_shape), int(row[2]*x_shape), int(row[1]*y_shape), int(row[3]*y_shape)
+                    # center = (int((x1+x2)/2), int((y1+y2)/2))
+                    # cv2.circle(image,center,3,color,-1)
+                    # cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+                    # cv2.putText(image, "{}: {} [{:.2f}]".format(predicted_labels[i], label, float(confidence)), 
+                    #     (x1,y1-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    # getBoundingBox(center, payload, frame, hsize=180)
+            # return predicted_labels[selected]
+            return predicted_labels[i]
         else:
-            print("No containers were found!")
+            # Floor
+            print("No containers were found!\n")
             return 3
 
 

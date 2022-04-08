@@ -51,22 +51,22 @@ while True:
 
     # Read from camera
     # ret, frame = cap.read()
-    frame = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
-    frame = cv2.resize(frame[300:3500,300:3500],(640, 480))
+    image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
+    image = cv2.resize(image[300:3500,300:3500],(640, 480))
 
         
-    if frame is None:
+    if image is None:
         break
 
-    x_shape, y_shape = frame.shape[1], frame.shape[0]
+    x_shape, y_shape = image.shape[1], image.shape[0]
     
     # print(frame.shape)
     # frame = cv2.resize(frame, (192,224))
     # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
     # Choose custom inference size and save test results
-    results = model(frame, size=224) # 640, 416, 224, 360, 160
+    results = model(image, size=224) # 640, 416, 224, 360, 160
 
     # Save the array of labels and the bounding box coordinates
     predicted_labels = results.xyxyn[0][:, -1].numpy()
@@ -75,8 +75,6 @@ while True:
     print("Predicted Labels:\n", predicted_labels)
     print("Bounding Boxes Coordinates:\n", cord_thres)
 
-    # fig, ax = plt.subplots(figsize=(8.33333333, 8.33333333), dpi=DPI)
-
     # TODO: Use reference angle
     # Change bbox orientation/angle
     # Figure out scada tags stuff
@@ -84,9 +82,9 @@ while True:
         # Convert predicted class labels (numeric) to readable labels
         for i in range(len(predicted_labels)):
             row = cord_thres[i]
-            confidence = cord_thres[i][4]
+            confidence = row[4]
             # If the confidence is > 0.6, predict_labels
-            if row[4] >= 0.6:
+            if confidence >= 0.6:
                 if predicted_labels[i] == 0:
                     color = (255, 0, 0)
                     label = "Black Box"
@@ -102,24 +100,21 @@ while True:
                 else:
                     print("An error occurred!\n")
                 # TODO: Make the bounding box rotate to adjust to the container
+
+                # Info to draw regular bounding box
                 x1, x2, y1, y2 = int(row[0]*x_shape), int(row[2]*x_shape), int(row[1]*y_shape), int(row[3]*y_shape)
                 center = (int((x1+x2)/2), int((y1+y2)/2))
-                cv2.circle(frame,center,3,color,-1)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(frame, "{}: {} [{:.2f}]".format(predicted_labels[i], label, float(confidence)), 
+                cv2.circle(image,center,3,color,-1)
+                cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(image, "{}: {} [{:.2f}]".format(predicted_labels[i], label, float(confidence)), 
                     (x1,y1-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-            
-            # getBoundingBox(center, payload, frame, hsize=180)
-
-
-        
+                # getBoundingBox(center, payload, frame, hsize=180)
     else:
         print("No containers were found!\n")
 
     # Display FPS on the video feed and in the terminal
     text = 'FPS: {:.1f}'.format(1 / (time.time() - start_time))
-    frame = cv2.putText(frame, text, origin, font, font_scale, color, thickness, cv2.LINE_AA)
+    image = cv2.putText(image, text, origin, font, font_scale, color, thickness, cv2.LINE_AA)
     print(text)
 
     cv2.waitKey(0)
@@ -130,8 +125,8 @@ while True:
 
     # Display frame and convert from BGR to RGB
     # results.show()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    cv2.imshow("Frame:", frame)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    cv2.imshow("Frame:", image)
 
     if (cv2.waitKey(1) & 0xFF) == 27:
         break
