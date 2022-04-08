@@ -255,20 +255,21 @@ def contour_min_Area_Rect(contour):
 
 
 # Choose camera
-cap = cv2.VideoCapture(0)
-
-while True:
+# cap = cv2.VideoCapture(0)
+flag = True
+while flag:
     # Set start time for FPS calculations
     start_time = time.time()
 
     # Read from camera
-    ret, rgb_image = cap.read()
+    # ret, rgb_image = cap.read()
+
+    # Let's load a simple image with 3 black squares
+    rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
+    rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
     
     if rgb_image is None:
         break
-    # Let's load a simple image with 3 black squares
-    # rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
-    rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
 
     # Grayscale
     gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
@@ -276,28 +277,69 @@ while True:
 
     # TODO: Look into using blurry (= More contours)
     # img = cv.medianBlur(gray_image,5)
-    blurry = cv2.GaussianBlur(gray,(9,9), 1)
+    ###blurry = cv2.GaussianBlur(gray,(9,9), 1)
+    blurry = cv2.GaussianBlur(gray,(9,9), 2)
+    # blurry = cv2.GaussianBlur(gray,(5,5), 1)
+    # cv2.imshow('Blurry', blurry)
+    # cv2.waitKey(0)
 
     # TODO: Look into using mask (= More contours)
     lower_range = (100, 0, 0)
     upper_range = (120, 255, 255)
     # mask = cv2.inRange(gray, lower_range, upper_range)
-    mask = cv2.inRange(gray, 100, 170)
+    lower = int(input("Lower: "))
+    upper = int(input("Upper: "))
+    mask = cv2.inRange(blurry, lower, upper)
+    # mask = cv2.inRange(blurry, 100, 155)
+    # Black     *5-10,90            90,200          100,155
+    # Orange    *70-75,110                  100,225 100,155
+    # White     65-100,200-225      90,200  100,225 100,155
 
-    cv2.imshow('Canny Edges', mask)
+    # cv2.imshow('Mask', mask)
+    # cv2.waitKey(0)
 
     # TODO: Refine these threshold values
     # Find Canny edges
     # edged = cv2.Canny(gray, 75, 200)
-    edged = cv2.Canny(mask, 50, 200)
-
-    cv2.imshow('Canny Edges', edged)
-    cv2.waitKey(0)
+    edged = cv2.Canny(mask, 100, 200)
+    _, inv_image = cv2.threshold(mask, 70, 255, cv2.THRESH_BINARY_INV)
+    # cv2.imshow('Canny Edges', np.vstack([mask,edged]))
+    cv2.imshow('Mask/Canny Edges', np.vstack([mask,inv_image]))
+    # cv2.imshow('Canny Edges', edged)
+    cv2.waitKey(1000)
 
     # Finding Contours
     # Use a copy of the image e.g. edged.copy()
     # since findContours alters the image
-    contours, hierarchy = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+
+    # Prev code
+    '''
+    [tR, tG, tB] = cv2.split(rgb_image)
+    [iR, iG, iB] = cv2.split(rgb_image) #edged
+
+    dR = cv2.absdiff(iR, tR)
+    dG = cv2.absdiff(iG, tG)
+    dB = cv2.absdiff(iB, tB)
+    bl = 19
+    cn = 15
+    tR = cv2.adaptiveThreshold(dR,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY_INV,bl,cn)
+    tG = cv2.adaptiveThreshold(dG,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY_INV,bl,cn)
+    tB = cv2.adaptiveThreshold(dB,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY_INV,bl,cn)
+    difference = cv2.merge([tR,tG,tB])
+    #cv2.imshow('fuzzy', cv2.merge([dR,dG,dB]))
+    difference = cv2.cvtColor(difference,cv2.COLOR_BGR2GRAY)
+    
+    k_size = 15
+    kernelmatrix = np.ones((k_size, k_size), np.uint8)
+    d = cv2.dilate(difference, kernelmatrix)
+    
+    fuzzy = cv2.GaussianBlur(d, (9,9), 4)
+    
+    contours, _ = cv2.findContours(fuzzy, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    '''
+
+    contours, hierarchy = cv2.findContours(inv_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     print("Number of Contours found = " + str(len(contours)))
 
     # TODO: Adjust contourArea threshold
@@ -309,6 +351,7 @@ while True:
     for c in new_contours:
         boxes = contour_bounding_Rect(c)
         bounds = contour_min_Area_Rect(c)
+        # cv2.approxPolyDP(c, approx, 5, True)
         targets_boxes.append(boxes)
         targets_bounds.append(bounds)
     # boxes = [contour_box(c) for c in new_contours]
@@ -343,24 +386,25 @@ while True:
         box = np.int0(box)
         # x1,x2,y1,y2 = bounds[0], bounds[1], bounds[0] + bounds[2], bounds[1] + bounds[3]
         # Display regular bounding box
-        # cv2.rectangle(copy2, (x1, x2), (y1, y2), (255, 0, 0), 2)
+        cv2.rectangle(copy2, (x1, x2), (y1, y2), (255, 0, 0), 2)
         cv2.drawContours(copy2, [box], 0, (255, 255, 0), 2)
 
     
     # cv2.imshow('Boxes', copy)
     cv2.imshow('Boxes', copy2)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
-    # Draw all contours
+    # Draw and display all contours
     # -1 signifies drawing all contours
-    cv2.drawContours(rgb_image, contours, -1, (255, 0, 0), 3)
-
+    # cv2.drawContours(rgb_image, contours, -1, (255, 0, 0), 3)
     # cv2.imshow('Contours', rgb_image)
     # cv2.waitKey(0)
+
+    # flag = False
     if (cv2.waitKey(1) & 0xFF) == 27:
         break
 
-cap.release()
+# cap.release()
 cv2.destroyAllWindows()
 
 
