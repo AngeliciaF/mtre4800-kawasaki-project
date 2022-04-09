@@ -1,167 +1,3 @@
-"""
-Contours shape recognition mainly based on cv2.approxPolyDP() function
-"""
-
-# # Import required packages:
-# import numpy as np
-# import cv2
-# from matplotlib import pyplot as plt
-
-'''
-def get_position_to_draw(text, point, font_face, font_scale, thickness):
-    """Gives the coordinates to draw centered"""
-
-    text_size = cv2.getTextSize(text, font_face, font_scale, thickness)[0]
-    text_x = point[0] - text_size[0] / 2
-    text_y = point[1] + text_size[1] / 2
-    return round(text_x), round(text_y)
-
-
-def detect_shape(contour):
-    """Returns the shape (e.g. 'triangle', 'square') from the contour"""
-
-    detected_shape = '-----'
-
-    # Calculate perimeter of the contour:
-    perimeter = cv2.arcLength(contour, True)
-
-    # Get a contour approximation:
-    contour_approx = cv2.approxPolyDP(contour, 0.03 * perimeter, True)
-
-    # Check if the number of vertices is 3. In this case, the contour is a triangle
-    if len(contour_approx) == 3:
-        detected_shape = 'triangle'
-
-    # Check if the number of vertices is 4. In this case, the contour is a square/rectangle
-    elif len(contour_approx) == 4:
-
-        # We calculate the aspect ration from the bounding rect:
-        x, y, width, height = cv2.boundingRect(contour_approx)
-        aspect_ratio = float(width) / height
-
-        # A square has an aspect ratio close to 1 (comparison chaining is used):
-        if 0.90 < aspect_ratio < 1.10:
-            detected_shape = "square"
-        else:
-            detected_shape = "rectangle"
-
-    # Check if the number of vertices is 5. In this case, the contour is a pentagon
-    elif len(contour_approx) == 5:
-        detected_shape = "pentagon"
-
-    # Check if the number of vertices is 6. In this case, the contour is a hexagon
-    elif len(contour_approx) == 6:
-        detected_shape = "hexagon"
-
-    # The shape as more than 6 vertices. In this example, we assume that is a circle
-    else:
-        detected_shape = "circle"
-
-    # return the name of the shape and the found vertices
-    return detected_shape, contour_approx
-
-
-def array_to_tuple(arr):
-    """Converts array to tuple"""
-
-    return tuple(arr.reshape(1, -1)[0])
-
-
-def draw_contour_points(img, cnts, color):
-    """Draw all points from a list of contours"""
-
-    for cnt in cnts:
-        print(cnt.shape)
-        squeeze = np.squeeze(cnt)
-        print(squeeze.shape)
-
-        for p in squeeze:
-            pp = array_to_tuple(p)
-            cv2.circle(img, pp, 10, color, -1)
-
-    return img
-
-
-def draw_contour_outline(img, cnts, color, thickness=1):
-    """Draws contours outlines of each contour"""
-
-    for cnt in cnts:
-        cv2.drawContours(img, [cnt], 0, color, thickness)
-    cv2.imshow("img", img)
-    cv2.waitKey(0)
-
-
-def show_img_with_matplotlib(color_img, title, pos):
-    """Shows an image using matplotlib capabilities"""
-
-    # Convert BGR image to RGB
-    img_RGB = color_img[:, :, ::-1]
-
-    ax = plt.subplot(2, 2, pos)
-    plt.imshow(img_RGB)
-    plt.title(title)
-    plt.axis('off')
-
-
-# Create the dimensions of the figure and set title:
-fig = plt.figure(figsize=(12, 9))
-plt.suptitle("Shape recognition based on cv2.approxPolyDP()", fontsize=14, fontweight='bold')
-fig.patch.set_facecolor('silver')
-
-# Load the image and convert it to grayscale:
-# image = build_sample_image_2()
-# rgb_image = cv2.imread("black_container1.jpg")
-rgb_image = cv2.imread("shapes1.jpg")
-rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)
-gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
-
-# Apply cv2.threshold() to get a binary image:
-ret, thresh = cv2.threshold(gray_image, 50, 255, cv2.THRESH_BINARY)
-
-# Find contours using the thresholded image:
-# Note: cv2.findContours() has been changed to return only the contours and the hierarchy
-contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-# Show the number of detected contours:
-print("detected contours: '{}' ".format(len(contours)))
-
-# Make a copy to draw the results:
-image_contours = rgb_image.copy()
-image_recognition_shapes = rgb_image.copy()
-
-# Draw the outline of all detected contours:
-draw_contour_outline(image_contours, contours, (255, 255, 255), 4)
-
-for contour in contours:
-    # Compute the moments of the current contour:
-    M = cv2.moments(contour)
-
-    # Calculate the centroid of the contour from the moments:
-    cX = int(M['m10'] / M['m00'])
-    cY = int(M['m01'] / M['m00'])
-
-    # Detect shape of the current contour:
-    shape, vertices = detect_shape(contour)
-
-    # Draw the detected vertices:
-    draw_contour_points(image_contours, [vertices], (255, 255, 255))
-
-    # Get the position to draw:
-    (x, y) = get_position_to_draw(shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 1.6, 3)
-
-    # Write the name of shape on the center of shapes
-    cv2.putText(image_recognition_shapes, shape, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.6, (255, 255, 255), 3)
-
-# Plot the images
-show_img_with_matplotlib(rgb_image, "image", 1)
-show_img_with_matplotlib(cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR), "threshold = 100", 2)
-show_img_with_matplotlib(image_contours, "contours outline (after approximation)", 3)
-show_img_with_matplotlib(image_recognition_shapes, "contours recognition", 4)
-
-# Show the Figure:
-plt.show()
-'''
-
 # import numpy as np
 # import cv2 as cv
 # # rgb_image = cv2.imread("black_container1.jpg")
@@ -230,7 +66,6 @@ plt.show()
 
 ### Find contours and draw a bounding box
 
-from ast import match_case
 import torch
 from PIL import Image
 import pandas as pd
@@ -239,6 +74,8 @@ import seaborn as sn
 import time
 import cv2
 import numpy as np
+# import freenect
+
 
 
 def contour_bounding_Rect(contour):
@@ -258,46 +95,74 @@ def contour_min_Area_Rect(contour):
 
 # Choose camera
 # cap = cv2.VideoCapture(0)
+
 flag = True
 while flag:
+# rgb_image, _ = freenect.sync_get_video()
+# while rgb_image:
     # Set start time for FPS calculations
-    start_time = time.time()
+    # start_time = time.time()
 
-    # Read from camera
+    # Read from Windows laptop camera
     # ret, rgb_image = cap.read()
 
-    # Let's load a simple image with 3 black squares
-    rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")
+    # Read from Kinect camera
+    # rgb_image, _ = freenect.sync_get_video()
+    # rgb_image = rgb_image.astype(np.uint8)
+    # rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    # Read image from folder
+    rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg") # 1-4
+    # rgb_image = cv2.imread("mtre4800-kawasaki-project\one_black_container3.jpg") # 1-3
+    # rgb_image = cv2.imread("mtre4800-kawasaki-project/floor1.jpg") # 1
+
 
     if rgb_image is None:
         break
 
     # TODO: Adjust these workspace/camera field of view boundaries
+    # based on actual camera location
+    # Zoom from top left and bottom right
     # rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
-    # left = int(input("Left: "))
-    # right = int(input("Right: "))
-    rgb_image = cv2.resize(rgb_image[300:3500,300:3500],(640, 480))
+    # left_boundary = int(input("left_boundary: "))
+    # right_boundary = int(input("right_boundary: "))
+    left_boundary = 0
+    right_boundary = 1000
+    # rgb_image = cv2.resize(rgb_image[300:3500,300:3500],(640, 480))
+    # rgb_image = cv2.resize(rgb_image[0:1000,0:1000],(640, 480))
+    # rgb_image = cv2.resize(rgb_image[left_boundary:right_boundary,left_boundary:right_boundary],(640, 480))
+    rgb_image = cv2.resize(rgb_image,(640, 480))
 
     # Grayscale
     gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
     # hsv_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HSV)
 
+
+    # TODO: Adjust k_size threshold 
+    # based on actual camera location
+    # k_size = int(input("k_size:"))
+    k_size = 7 # 0 - 8; 15
+    kernelmatrix = np.ones((k_size, k_size), np.uint8)
+    dilated = cv2.dilate(gray, kernelmatrix)
+
+
     # TODO: Look into using blurry (= More contours)
     # img = cv.medianBlur(gray_image,5)
     ###blurry = cv2.GaussianBlur(gray,(9,9), 1)
-    blurry = cv2.GaussianBlur(gray,(9,9), 2)
+    blurry = cv2.GaussianBlur(dilated,(9,9), 2)
     # blurry = cv2.GaussianBlur(gray,(5,5), 1)
     # cv2.imshow('Blurry', blurry)
     # cv2.waitKey(0)
 
-    # TODO: Look into using mask (= More contours)
-    lower_range = (100, 0, 0)
-    upper_range = (120, 255, 255)
+    # TODO: Adjust mask threshold 
+    # based on actual camera location
+    # lower_range = (100, 0, 0)
+    # upper_range = (120, 255, 255)
     # mask = cv2.inRange(gray, lower_range, upper_range)
-    # lower = int(input("Lower: "))
-    # upper = int(input("Upper: "))
-    # mask = cv2.inRange(blurry, lower, upper)
-    mask = cv2.inRange(blurry, 100, 155)
+    # lower_mask = int(input("lower_mask: "))
+    # upper_mask = int(input("upper_mask: "))
+    lower_mask = 110 #100
+    upper_mask = 170 #155
+    mask = cv2.inRange(blurry, lower_mask, upper_mask)
     # mask = cv2.inRange(blurry, 100, 155)
     # Black     *5-10,90            90,200          100,155
     # Orange    *70-75,110                  100,225 100,155
@@ -309,17 +174,24 @@ while flag:
     # TODO: Refine these threshold values
     # Find Canny edges
     # edged = cv2.Canny(gray, 75, 200)
-    edged = cv2.Canny(mask, 100, 200)
-    _, inv_image = cv2.threshold(mask, 70, 255, cv2.THRESH_BINARY_INV)
+    # edged = cv2.Canny(mask, 100, 200)
+
+    # Invert
+    # TODO: Adjust invert threshold 
+    # based on actual camera location
+    # lower_invert = int(input("lower_invert: "))
+    # upper_invert = int(input("upper_invert: "))
+    lower_invert = 70 # any value?
+    upper_invert = 255
+    _, inv_image = cv2.threshold(mask, lower_invert, upper_invert, cv2.THRESH_BINARY_INV)
     # cv2.imshow('Canny Edges', np.vstack([mask,edged]))
-    cv2.imshow('Mask/Canny Edges', np.vstack([mask,inv_image]))
+    cv2.imshow('Mask/Inv', np.vstack([mask,inv_image]))
     # cv2.imshow('Canny Edges', edged)
     cv2.waitKey(1000)
 
     # Finding Contours
     # Use a copy of the image e.g. edged.copy()
     # since findContours alters the image
-
 
     # Prev code
     '''
@@ -350,37 +222,70 @@ while flag:
     contours, hierarchy = cv2.findContours(inv_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     print("Number of Contours found = " + str(len(contours)))
 
-    # TODO: Adjust contourArea threshold
-    new_contours = [c for c in contours if cv2.contourArea(c) >= 5000] # and cv2.contourArea(c) <= 2000]
-    print("Number of New Contours found = " + str(len(new_contours)))
+    # TODO: Adjust contourArea threshold 
+    # based on actual camera location
+    # new_contours = [c for c in contours if cv2.contourArea(c) >= 5000] # and cv2.contourArea(c) <= 2000]
+    refined_contours = []
+    contour_area_list = []
+
+    copy = rgb_image.copy()
+
+    # min_contour_area = int(input("min_contour_area:"))
+    # max_contour_area = int(input("max_contour_area:"))
+    min_contour_area = 6800
+    max_contour_area = 31000
+    for c in contours:
+        contour_area = cv2.contourArea(c,False)
+        # contour_area = cv2.contourArea(c,True)
+        print("contour_area:", contour_area)
+        if abs(contour_area) >= min_contour_area and abs(contour_area) <= max_contour_area:
+        # if contour_area >= 3000 and contour_area <= 50000:
+            refined_contours.append(c)
+            contour_area_list.append(contour_area)
+        # epsilon = 0.1*cv2.arcLength(c,True)
+        # epsilon = 0.1*cv2.arcLength(c,False)
+        # print("epsilon", epsilon)
+        # approx = cv2.approxPolyDP(c,epsilon,True)
+        # approx_image = cv2.drawContours(copy, c, -1, (255,0,255), 5)
+        # cv2.imshow("approx_image", approx_image)
+        # cv2.waitKey(0)
+    print("Number of Refined Contours found = " + str(len(refined_contours)))
 
     targets_boxes = []
     targets_bounds = []
-    for c in new_contours:
+    for c in refined_contours:
         boxes = contour_bounding_Rect(c)
         bounds = contour_min_Area_Rect(c)
         # cv2.approxPolyDP(c, approx, 5, True)
         targets_boxes.append(boxes)
         targets_bounds.append(bounds)
+        # # epsilon = 0.1*cv2.arcLength(c,True)
+        # epsilon = 0.1*cv2.arcLength(c,False)
+        # print("epsilon", epsilon)
+        # approx = cv2.approxPolyDP(c,epsilon,True)
+        # approx_image = cv2.drawContours(copy, approx, -1, (255,0,255), 5)
+        # cv2.imshow("approx_image", approx_image)
+        # cv2.waitKey(5000)
+
     # boxes = [contour_box(c) for c in new_contours]
 
-    copy = rgb_image.copy()
-    contours_image = cv2.drawContours(copy, contours, -1, (255,0,255), 2)
+    copy0 = rgb_image.copy()
+    contours_image = cv2.drawContours(copy0, contours, -1, (255,0,255), 2)
     # cv2.imshow('Contours Image', contours_image)
     # cv2.waitKey(0)
 
     copy1 = rgb_image.copy()
-    new_contours_image = cv2.drawContours(copy1, new_contours, -1, (255,0,255), 2)
+    new_contours_image = cv2.drawContours(copy1, refined_contours, -1, (255,0,255), 2)
     # cv2.imshow('New Contours Image', new_contours_image)
     # cv2.waitKey(0)
 
     final = rgb_image.copy()
-    for boxes in targets_boxes:
-
+    for index,boxes in enumerate(targets_boxes):
         x1,x2,y1,y2 = boxes[0], boxes[1], boxes[0] + boxes[2], boxes[1] + boxes[3]
-        center = (int((x1+x2)/2), int((y1+y2)/2))
+        box_center = (int((x1+y1)/2),int((x2+y2)/2))
         cv2.rectangle(final, (x1, x2), (y1, y2), (0, 255, 0), 2)
-        cv2.line(final, (int((x1+y1)/2),int((x2+y2)/2)), (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
+        cv2.putText(final, f'{int(contour_area_list[index])}',box_center, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.line(final, box_center, (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
 
     for bounds in targets_bounds:
         # Rectangle boundaries -> Box
@@ -391,13 +296,12 @@ while flag:
         # Display regular bounding box
         # cv2.rectangle(copy2, (x1, x2), (y1, y2), (255, 0, 0), 2)
         # cv2.line(final, (int((box[0][0]+box[1][0])/2),int((box[1][1]+box[2][1])/2)), (int(final.shape[1]/2),int(final.shape[0]/2)), (100,0,100), 2)
-
         cv2.drawContours(final, [box], 0, (255, 255, 0), 2)
 
     
     # cv2.imshow('Boxes', copy)
     cv2.imshow('Boxes', final)
-    # cv2.waitKey(0)
+    cv2.waitKey(0)
 
     # Draw and display all contours
     # -1 signifies drawing all contours
@@ -405,117 +309,10 @@ while flag:
     # cv2.imshow('Contours', rgb_image)
     # cv2.waitKey(0)
 
-    # flag = False
+    flag = False
     if (cv2.waitKey(1) & 0xFF) == 27:
         break
 
 # cap.release()
 cv2.destroyAllWindows()
 
-
-# Plot rotating bounding boxes
-'''
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-DPI = 72
-
-# Rotation centre. It is helpful to have this with shape (2,1)
-cx, cy = 150, 50
-rc = np.array(((cx, cy),)).T
-
-# Initial width and height of the bounding rectangle we will fit the object in.
-rw, rh = 200, 300
-# Initial corner positions of the bounding rectangle 
-x1, y1, x2, y2 = 250, 50, 250+rw, 50+rh
-
-def rotate_points(pts, theta, rc):
-    """Rotate the (x,y) points pts by angle theta about centre rc."""
-    c, s = np.cos(theta), np.sin(theta)
-    R = np.array(((c,-s), (s, c)))
-    return rc + R @ (pts - rc)
-
-
-def plot_poly(pts, colour='tab:blue', lw=2, opacity=1, ls='-'):
-    """Plot a closed polygon with vertices at pts."""
-
-    plot_pts = np.vstack((pts.T, pts[:,0]))
-    ax.plot(*zip(*plot_pts), c=colour, lw=lw, alpha=opacity, ls=ls)
-
-
-def plot_obj(pts, colour='tab:green', lw=2):
-    """Draw the object we are rotating: a circle and polygon."""
-
-    plot_poly(pts[:,1:], colour, lw=lw, opacity=0.5)
-    circle = Circle(pts[:,0], obj_cr, edgecolor=colour, fill=False, lw=lw,
-                    alpha=0.5)
-    ax.add_patch(circle)
-
-
-def get_boundary_pts(pts):
-    """Get the vertices of the bounding rectangle for the points pts."""
-
-    xmin, xmax = np.min(pts[0]), np.max(pts[0])
-    ymin, ymax = np.min(pts[1]), np.max(pts[1])
-    return np.array(((xmin,ymin), (xmax,ymin), (xmax, ymax), (xmin, ymax))).T
-
-
-def get_obj_boundary(obj_pts):
-    """Get the vertices of the bounding rectangle for the rotated object."""
-
-    fcx, fcy = obj_pts[:,0]
-    # Get the boundary from the triangle coordinates and the circle limits
-    _obj_boundary = np.vstack((obj_pts.T[1:], (fcx-obj_cr, fcy),
-                (fcx+obj_cr, fcy), (fcx, fcy-obj_cr), (fcx, fcy+obj_cr))).T
-    return get_boundary_pts(_obj_boundary)
-
-
-
-
-fig, ax = plt.subplots(figsize=(8.33333333, 8.33333333), dpi=DPI)
-
-# Initial bounding rectangle of unrotated object.
-pts = np.array( ((x1,y1), (x2,y1), (x2,y2), (x1,y2)) ).T
-# The radius of the circle in our plotted object.
-obj_cr = (rh - rw*np.sqrt(3)/2)/2
-# The coordinates defining our object.
-obj_pts = np.array( ((x1 + rw/2, y1 + rh - obj_cr),    # circle centre
-                     (x1, y1), (x2, y1),               #
-                     (x1+rw/2, y2-2*obj_cr),           # triangle
-                    )).T
-# Plot the unrotated object and its bounding rectangle
-# plot_obj(obj_pts)
-# plot_poly(pts)
-
-nrots = 60
-theta = np.radians(360 // nrots)
-boundary_trail_pts, obj_boundary_trail_pts = [], []
-for i in range(nrots):
-    fig, ax = plt.subplots(figsize=(8.33333333, 6.25), dpi=DPI)
-    ax.set_xlim(-600,600)
-    ax.set_ylim(-600,600)
-    # Indicate the centre of rotation
-    ax.add_patch(Circle((cx,cy), 10))
-
-    # Plot the object
-    plot_obj(obj_pts)
-    # Plot the rotated object's boundary
-    # boundary_pts = get_obj_boundary(obj_pts)
-    # plot_poly(boundary_pts, colour='tab:purple', ls='--')
-    # obj_boundary_trail_pts.append(np.mean(boundary_pts, axis=1))
-    # ax.plot(*zip(*obj_boundary_trail_pts), c='tab:purple', ls='--')
-
-    # Plot the original boundary, rotated
-    plot_poly(pts, colour='tab:blue')
-    # Plot the boundary to the original rotated boundary
-    # boundary_pts = get_boundary_pts(pts)
-    # plot_poly(boundary_pts, colour='tab:orange', ls=':')
-    # boundary_trail_pts.append(np.mean(boundary_pts, axis=1))
-    # ax.plot(*zip(*boundary_trail_pts), c='tab:orange', ls=':')
-
-    # plt.savefig('frames/bbrot-{:03d}.png'.format(i+1), dpi=DPI)
-
-    obj_pts = rotate_points(obj_pts, theta, rc)
-    pts = rotate_points(pts, theta, rc)
-    plt.show()
-'''
