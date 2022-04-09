@@ -1,4 +1,7 @@
 # Utilized YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+
+# Add new code to the kinect_detect2 in yolov5 and copy to tracked kinect_detect in mtre... repo
+
 """
 Run inference on the live video feed from the Windows webcam
 

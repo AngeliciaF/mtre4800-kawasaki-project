@@ -155,7 +155,7 @@ for frame in range(0, 100):
             if scada['robot_tags']['home']:
                 # Get 1 prediction at a time
 
-                # FIXME: 2 Ask Tim: Does this just return the 1st prediction even if there are multiple boxes?
+                # FIXME: 2 Ask Tim: Does this just return the 1st prediction, even if there are multiple boxes?
                 prediction = yolo_model.getPrediction(yolo_model.model, rgb_image, payload, selected)
                 # prediction = model.getPrediction(sample, payload)
                 payload.z = heights[payload.type]
