@@ -7,6 +7,7 @@ import math
 import matplotlib.mlab as mlab
 from matplotlib import pyplot as plt
 import sys
+import copy
 
 
 def start():
@@ -36,11 +37,25 @@ def start():
         #     door_movement()
         # else: regular_movement()
 
-        gdepth = GLOBAL_DEPTH_MAP[GLOBAL_DEPTH_MAP > 500] #ignores closest points <500mm
+        #gdepth = GLOBAL_DEPTH_MAP[GLOBAL_DEPTH_MAP > 0] #ignores closest points <500mm
+
+        #gdepth = copy.deepcopy(GLOBAL_DEPTH_MAP[20:40][0:200])
+        ymin = 200
+        ymax = 400
+        xmin = 400
+        xmax = 500
+        minrange = 150
+
+        gdepth = GLOBAL_DEPTH_MAP[ymin:ymax, xmin:xmax]
+
+        gdepth = gdepth[gdepth > minrange]
+
         gdepth_mins = np.partition(gdepth,100)[:100] #sample 100 closest points
-        #arr2 = deepcopy(gdepth_mins[20000:300000])
-        print(gdepth)
-        print(gdepth_mins)
+      
+        
+        #print(gdepth)
+        #print(gdepth_mins)
+
         print("estimated distance:",np.mean(gdepth_mins)) #avg closest points for approx distance
         print("test")
         cv2.imshow('final', GLOBAL_DEPTH_MAP)
