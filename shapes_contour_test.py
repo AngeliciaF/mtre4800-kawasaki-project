@@ -1,68 +1,71 @@
-# import numpy as np
-# import cv2 as cv
-# # rgb_image = cv2.imread("black_container1.jpg")
-# rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
-# # rgb_image = cv2.imread("shapes1.jpg")
-# rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)
-# gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
-# # img = cv.medianBlur(gray_image,5)
-# image = cv2.GaussianBlur(gray_image,(9,9), 4)
+# Test contour/container detection
+'''
+import numpy as np
+import cv2 as cv
+# rgb_image = cv2.imread("black_container1.jpg")
+rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
+# rgb_image = cv2.imread("shapes1.jpg")
+rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)
+gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
+# img = cv.medianBlur(gray_image,5)
+image = cv2.GaussianBlur(gray_image,(9,9), 4)
 
-# cv2.imshow("image0", image)
-# cv2.waitKey(0)
+cv2.imshow("image0", image)
+cv2.waitKey(0)
 
 
-# import sys
-# import cv2 as cv
-# import numpy as np
-# # def main(argv):
+import sys
+import cv2 as cv
+import numpy as np
+# def main(argv):
     
-# # src = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
-# src = cv2.imread("rgb_circle.png")
-# # rgb_image = cv2.imread("shapes1.jpg")
-# src = cv2.resize(src, (640, 480)) # (192, 224)
-# gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
+# src = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
+src = cv2.imread("rgb_circle.png")
+# rgb_image = cv2.imread("shapes1.jpg")
+src = cv2.resize(src, (640, 480)) # (192, 224)
+gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
 
-# gray = cv.medianBlur(gray, 5)
+gray = cv.medianBlur(gray, 5)
 
-# rows = gray.shape[0]
-# # circles = cv.HoughCircles(gray, cv.HOUGH_GRADIENT, 1, rows / 8,
-# #                             param1=100, param2=30,
-# #                             minRadius=1, maxRadius=30)
+rows = gray.shape[0]
+# circles = cv.HoughCircles(gray, cv.HOUGH_GRADIENT, 1, rows / 8,
+#                             param1=100, param2=30,
+#                             minRadius=1, maxRadius=30)
 
-# circles = cv.HoughCircles(gray,cv.HOUGH_GRADIENT,1,100,
-#                             param1=60,param2=40,minRadius=0,maxRadius=0)
+circles = cv.HoughCircles(gray,cv.HOUGH_GRADIENT,1,100,
+                            param1=60,param2=40,minRadius=0,maxRadius=0)
 
-# if circles is not None:
-#     circles = np.uint16(np.around(circles))
-#     for i in circles[0, :]:
-#         center = (i[0], i[1])
-#         print(i)
-#         # circle center
-#         cv.circle(src, center, 1, (0, 100, 100), 3)
-#         # circle outline
-#         radius = i[2]
-#         cv.circle(src, center, radius, (255, 0, 255), 3)
+if circles is not None:
+    circles = np.uint16(np.around(circles))
+    for i in circles[0, :]:
+        center = (i[0], i[1])
+        print(i)
+        # circle center
+        cv.circle(src, center, 1, (0, 100, 100), 3)
+        # circle outline
+        radius = i[2]
+        cv.circle(src, center, radius, (255, 0, 255), 3)
 
-# cv.imshow("detected circles", src)
-# cv.waitKey(0)
+cv.imshow("detected circles", src)
+cv.waitKey(0)
 
-# # load the image and display it
-# rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
-# # rgb_image = cv2.imread("shapes1.jpg")
-# rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
-# # convert the image to grayscale and threshold it
-# gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
-# ### thresh1 = cv2.threshold(gray, 190, 255, cv2.THRESH_BINARY_INV)[1]
-# _, thresh2 = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)
-# _,thresh3 = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY_INV)
+# load the image and display it
+rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers1.jpg")
+# rgb_image = cv2.imread("shapes1.jpg")
+rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
+# convert the image to grayscale and threshold it
+gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
+### thresh1 = cv2.threshold(gray, 190, 255, cv2.THRESH_BINARY_INV)[1]
+_, thresh2 = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)
+_,thresh3 = cv2.threshold(gray, 130, 255, cv2.THRESH_BINARY_INV)
 
-# # threshers = [thresh1, thresh2,thresh3]
-# # threshers = [thresh1, thresh2]
-# threshers = [thresh2, thresh3]
-# cv2.imshow("Thresh", np.hstack(threshers))
-# # cv2.imshow("Thresh", threshers)
-# cv2.waitKey(0)
+# threshers = [thresh1, thresh2,thresh3]
+# threshers = [thresh1, thresh2]
+threshers = [thresh2, thresh3]
+cv2.imshow("Thresh", np.hstack(threshers))
+# cv2.imshow("Thresh", threshers)
+cv2.waitKey(0)
+'''
 
 ### Find contours and draw a bounding box
 
@@ -74,9 +77,7 @@ import seaborn as sn
 import time
 import cv2
 import numpy as np
-# import freenect
-
-
+import freenect
 
 def contour_bounding_Rect(contour):
     # Regular bounding box
@@ -98,8 +99,6 @@ def contour_min_Area_Rect(contour):
 
 flag = True
 while flag:
-# rgb_image, _ = freenect.sync_get_video()
-# while rgb_image:
     # Set start time for FPS calculations
     # start_time = time.time()
 
@@ -107,40 +106,44 @@ while flag:
     # ret, rgb_image = cap.read()
 
     # Read from Kinect camera
-    # rgb_image, _ = freenect.sync_get_video()
-    # rgb_image = rgb_image.astype(np.uint8)
-    # rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    rgb_image, _ = freenect.sync_get_video()
+    # rgb_image, _ = freenect.sync_get_depth()
+
+    rgb_image = rgb_image.astype(np.uint8)
+    rgb_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    
     # Read image from folder
-    rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg") # 1-4
-    # rgb_image = cv2.imread("mtre4800-kawasaki-project\one_black_container3.jpg") # 1-3
-    # rgb_image = cv2.imread("mtre4800-kawasaki-project/floor1.jpg") # 1
+    # rgb_image = cv2.imread("mtre4800-kawasaki-project/three_containers4.jpg")     # 1-4
+    # rgb_image = cv2.imread("mtre4800-kawasaki-project\one_black_container3.jpg")  # 1-3
+    # rgb_image = cv2.imread("mtre4800-kawasaki-project/floor1.jpg")                # 1
 
 
     if rgb_image is None:
+        # flag = False
         break
 
-    # TODO: Adjust these workspace/camera field of view boundaries
+    # TODO: 1st Adjust these workspace/camera field of view boundaries
     # based on actual camera location
     # Zoom from top left and bottom right
     # rgb_image = cv2.resize(rgb_image, (640, 480)) # (192, 224)cv2.imshow("Image", image)
     # left_boundary = int(input("left_boundary: "))
     # right_boundary = int(input("right_boundary: "))
-    left_boundary = 0
-    right_boundary = 1000
+    # left_boundary = 0
+    # right_boundary = 1000
     # rgb_image = cv2.resize(rgb_image[300:3500,300:3500],(640, 480))
     # rgb_image = cv2.resize(rgb_image[0:1000,0:1000],(640, 480))
-    # rgb_image = cv2.resize(rgb_image[left_boundary:right_boundary,left_boundary:right_boundary],(640, 480))
-    rgb_image = cv2.resize(rgb_image,(640, 480))
+    rgb_image = cv2.resize(rgb_image[0:510, 55:510],(640, 480))
+    # rgb_image = cv2.resize(rgb_image,(640, 480))
 
     # Grayscale
     gray = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
     # hsv_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2HSV)
 
 
-    # TODO: Adjust k_size threshold 
+    # TODO: ??? Adjust k_size threshold 
     # based on actual camera location
     # k_size = int(input("k_size:"))
-    k_size = 7 # 0 - 8; 15
+    k_size = 5 # 0 - 8; 15
     kernelmatrix = np.ones((k_size, k_size), np.uint8)
     dilated = cv2.dilate(gray, kernelmatrix)
 
@@ -153,15 +156,15 @@ while flag:
     # cv2.imshow('Blurry', blurry)
     # cv2.waitKey(0)
 
-    # TODO: Adjust mask threshold 
+    # TODO: ??? Adjust mask threshold 
     # based on actual camera location
     # lower_range = (100, 0, 0)
     # upper_range = (120, 255, 255)
     # mask = cv2.inRange(gray, lower_range, upper_range)
     # lower_mask = int(input("lower_mask: "))
     # upper_mask = int(input("upper_mask: "))
-    lower_mask = 110 #100
-    upper_mask = 170 #155
+    lower_mask = 40 #110 #100
+    upper_mask = 130 #170 #155
     mask = cv2.inRange(blurry, lower_mask, upper_mask)
     # mask = cv2.inRange(blurry, 100, 155)
     # Black     *5-10,90            90,200          100,155
@@ -177,17 +180,17 @@ while flag:
     # edged = cv2.Canny(mask, 100, 200)
 
     # Invert
-    # TODO: Adjust invert threshold 
+    # TODO: ??? N/A Adjust invert threshold 
     # based on actual camera location
     # lower_invert = int(input("lower_invert: "))
     # upper_invert = int(input("upper_invert: "))
-    lower_invert = 70 # any value?
+    lower_invert = 0 # any value (upper_invert-1)?
     upper_invert = 255
     _, inv_image = cv2.threshold(mask, lower_invert, upper_invert, cv2.THRESH_BINARY_INV)
     # cv2.imshow('Canny Edges', np.vstack([mask,edged]))
     cv2.imshow('Mask/Inv', np.vstack([mask,inv_image]))
     # cv2.imshow('Canny Edges', edged)
-    cv2.waitKey(1000)
+    cv2.waitKey(100)
 
     # Finding Contours
     # Use a copy of the image e.g. edged.copy()
@@ -222,18 +225,17 @@ while flag:
     contours, hierarchy = cv2.findContours(inv_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     print("Number of Contours found = " + str(len(contours)))
 
-    # TODO: Adjust contourArea threshold 
-    # based on actual camera location
-    # new_contours = [c for c in contours if cv2.contourArea(c) >= 5000] # and cv2.contourArea(c) <= 2000]
+    copy = rgb_image.copy()
     refined_contours = []
     contour_area_list = []
 
-    copy = rgb_image.copy()
-
+    # TODO: 4th Adjust contourArea threshold 
+    # based on actual camera location
+    
     # min_contour_area = int(input("min_contour_area:"))
     # max_contour_area = int(input("max_contour_area:"))
-    min_contour_area = 6800
-    max_contour_area = 31000
+    min_contour_area = 4000
+    max_contour_area = 30000 #75000 #30000
     for c in contours:
         contour_area = cv2.contourArea(c,False)
         # contour_area = cv2.contourArea(c,True)
@@ -301,7 +303,8 @@ while flag:
     
     # cv2.imshow('Boxes', copy)
     cv2.imshow('Boxes', final)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
+    cv2.waitKey(1000)
 
     # Draw and display all contours
     # -1 signifies drawing all contours
@@ -309,7 +312,8 @@ while flag:
     # cv2.imshow('Contours', rgb_image)
     # cv2.waitKey(0)
 
-    flag = False
+    # flag: Used to stop while loop after 1 run/pass
+    # flag = False
     if (cv2.waitKey(1) & 0xFF) == 27:
         break
 
