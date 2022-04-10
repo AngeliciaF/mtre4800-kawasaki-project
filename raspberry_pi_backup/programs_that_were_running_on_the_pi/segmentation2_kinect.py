@@ -92,7 +92,7 @@ def getPayloads(image):
         if contour_area >= 9000 and contour_area <= 31000:
             refined_contours.append(c)
 
-    print("Number of New Contours found = " + str(len(refined_contours)))
+    print("Number of Refined Contours found = " + str(len(refined_contours)))
 
     copy1 = image.copy()
     new_contours_image = cv2.drawContours(copy1, refined_contours, -1, (255,0,0), 2)
@@ -103,25 +103,26 @@ def getPayloads(image):
     center = (0,0)
     selected = -1
     payloads = []
+    new_distance_list = []
     bounding_box = []
-    index = 0
-    count = 0
+    # index = 0
+    index = 1
+    # count = 0
     for contour in refined_contours:
-        count += 1
-        print("count:", count)
+        # count += 1
+        # print("count:", count)
         # Contours -> rectangle boundaries
         bounds = cv2.minAreaRect(contour)
         # Rectangle boundaries -> Box
         box = cv2.boxPoints(bounds)
         # Box corners -> int
         box = numpy.int0(box)
-        bounding_box.append(box)
 
         # Subtract old center x from width/2
         oc_dx = abs(center[0]-(image.shape[1]/2))
         # Subtract old center y height/2
         oc_dy = abs(center[1]-(image.shape[0]/2))
-        # Calculate old distance
+        # Calculate old distance (pixels) from contour center to center of gripper/image
         old_distance = math.sqrt(oc_dx**2+oc_dy**2)
     
         new_center = numpy.int0(bounds[0])
@@ -129,8 +130,9 @@ def getPayloads(image):
         nc_dx = abs(new_center[0]-(image.shape[1]/2))
         # Subtract new center y height/2
         nc_dy = abs(new_center[1]-(image.shape[0]/2))
-        # Calculate new distance
+        # Calculate new distance (pixels) from contour center to center of gripper/image
         new_distance = math.sqrt(nc_dx**2+nc_dy**2)
+
 
         # if check_size_low(bounds):
         new_payload = Payload()
@@ -141,21 +143,37 @@ def getPayloads(image):
         new_payload.r = reference_rotation(bounds)
         # FIXME: 2 Ask Tim: Is this the distance from the center of the gripper
         #                   to the center of the container?
-        new_payload.distance = new_distance*6.5 ###
+        new_payload.distance = new_distance*6.5 ### mm
         payloads.append(new_payload)
+        # new_distance_list.append(new_payload.distance)
 
+    # Sort distances and payload at the same time based on shortest distance
+    for d in new_distance_list:
+        # if new_distance < old_distance:
+            
+
+        # FIXME: 3 Ask Tim: Can you explain this to me (selected)?
         if new_distance < old_distance:
-            selected = index
+            # selected = index
+            # payloads[selected].selected = 1
+            # if len(payloads) == 0:
+                # payloads[index].selected = 1
+            payloads[index-1] = new_payload
+        else:
+            payloads.append(new_payload)
+
+            bounding_box.append(box)
             center = new_center
         index += 1
     
-    # TODO: Understand this
+    # FIXME: 3 Ask Tim: And this?
     if len(payloads) > 0:
         payloads[selected].selected = 1
 
     # cv2.imshow("imagelast", image)
     # cv2.waitKey(0)
     # box is used in drawpayload
+    payload[0].selected = 1
     return payloads, bounding_box
 
 # FIXME: Work on this (Get bounding boxes then Draw the payloads on the image)
@@ -254,8 +272,8 @@ def check_size_low(bounds):
 # MS Paint
 # Robot at home
 def convert_units(x,y,shape):
-    x = -( x - (shape[1]/2) -73 )
-    y = ( y - (shape[0]/2) +11 )
+    x = -( x - (shape[1]/2) -73)
+    y = ( y - (shape[0]/2) +11)
     mm_px = 1.49
     x *= mm_px
     y *= mm_px
@@ -269,6 +287,7 @@ def convert_units(x,y,shape):
 # cv cw -> +
 # robot ccw -> +
 def reference_rotation(bounds):
+    # FIXME: 3 Ask Tim: Why is this used? So that 0 - 90 is returned?
     adjust = 0
     width = bounds[1][0]
     height = bounds[1][1]

@@ -54,7 +54,8 @@ def getPayload(img):
     # cv2.waitKey(0)
     _, image = cv2.threshold(image, 70, 255, cv2.THRESH_BINARY_INV)
     contours,_ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    
+    for c in contours:
+        cv2.drawContours(image, c,0,(0,0,255),2)
     cv2.imshow("image2", image)
     cv2.waitKey(0)
 
@@ -324,6 +325,4 @@ print("getPrediction:", predicted_labels)
 
 if scada['robot_tags']['home']:
     draw_payloads(rgb_image, payloads, bounding_box, yolo_model.labels)
-
-
 

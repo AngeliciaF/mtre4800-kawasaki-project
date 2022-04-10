@@ -3,6 +3,12 @@ import socket
 from time import time as now
 from copy import deepcopy
 
+# Organizes scada, cv, and ml programs
+# Server in the Pi
+'''
+Starts 8090 port
+Server has 1 static port
+'''
 class Tags:
     def __init__(self):
         self.vision_tags = { 'x':0 }

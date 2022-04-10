@@ -108,6 +108,10 @@ print("Main")
 heights = [-254, -374, -343, -275, 0]
 # heights = [-254, -275, bucket, 0]
 
+# TODO: Remeasure these
+x_kinect_camera_offset = 12#?
+y_kinect_camera_offset = 178    # 235 mm: Distance from the camera to the gripper Center
+
 template = cv2.imread('mtre4800-kawasaki-project/three_containers1.jpg')
 template = cv2.resize(template,(648,488))
 template = template[60:480,70:610]
@@ -171,8 +175,8 @@ for frame in range(0, 100):
     tag_set = Payload().tags()
     if len(payloads) > 0:
         # FIXME: 2 Ask Tim: Why are these not in a for loop?
-        payloads[selected].x = x
-        payloads[selected].y = y
+        payloads[selected].x = x + x_kinect_camera_offset
+        payloads[selected].y = y + y_kinect_camera_offset
         cv2.putText(rgb_image, "X: " + str(round(payloads[selected].x,0)) + 'mm', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
         cv2.putText(rgb_image, "Y: " + str(round(payloads[selected].y,0)) + 'mm', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
