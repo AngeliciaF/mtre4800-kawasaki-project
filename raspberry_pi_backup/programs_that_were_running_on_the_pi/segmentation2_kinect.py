@@ -161,7 +161,6 @@ def getPayloads(image):
             payloads[index-1] = new_payload
         else:
             payloads.append(new_payload)
-
             bounding_box.append(box)
             center = new_center
         index += 1
@@ -173,7 +172,7 @@ def getPayloads(image):
     # cv2.imshow("imagelast", image)
     # cv2.waitKey(0)
     # box is used in drawpayload
-    payload[0].selected = 1
+    payloads[0].selected = 1
     return payloads, bounding_box
 
 # FIXME: Work on this (Get bounding boxes then Draw the payloads on the image)
@@ -333,22 +332,23 @@ def draw_payloads(image, payloads, bounding_box, labels):
         print("draw payloads.selected:", payload.selected)
         center = (payload.x, payload.y)
         color = (0,0,255)
-        # font_color = (0,0,0)
+        font_color = (0,0,0)
         # if payload.selected:
-        if True:
+        if True: 
             center = (payload.x, payload.y)
             color = (0,255,0)
             if bounding_box is not None:
                 # cv2.drawContours(img, [bounding_box], 0, color, 2)
-                cv2.drawContours(image, [bounding_box[index]], 0, (255, 255, 0), 2)
+                # cv2.drawContours(image, [bounding_box[index]], 0, (255, 255, 0), 2)
+                cv2.drawContours(image, [bounding_box[0]], 0, (255, 255, 0), 2)
             print("center:", center)
         image = cv2.circle(image,center,4,color,3)
         # cv2.rectangle(img, (center[0]+7, center[1]-100), (center[0]+240, center[1]+80), (255,255,255), -1)
-        # cv2.putText(img, "D: " + str(round(payload.distance,0))+'px', (center[0]+10, center[1]-60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
-        # cv2.putText(img, "X: " + str(round(payload.x,0)) + 'px', (center[0]+10, center[1]-30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
-        # cv2.putText(img, "Y: " + str(round(payload.y,0)) + 'px', (center[0]+10, center[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
-        # cv2.putText(img, "R: " + str(round(payload.r,0)) + 'deg', (center[0]+10, center[1]+30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
-        # cv2.putText(img, labels[payload.type], (center[0]+10, center[1]+60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
+        cv2.putText(image, "D: " + str(round(payload.distance,0))+'px', (center[0]+10, center[1]-60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
+        cv2.putText(image, "X: " + str(round(payload.x,0)) + 'px', (center[0]+10, center[1]-30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
+        cv2.putText(image, "Y: " + str(round(payload.y,0)) + 'px', (center[0]+10, center[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
+        cv2.putText(image, "R: " + str(round(payload.r,0)) + 'deg', (center[0]+10, center[1]+30), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
+        cv2.putText(image, labels[payload.type], (center[0]+10, center[1]+60), cv2.FONT_HERSHEY_SIMPLEX, 1, font_color, 2)
         cv2.line(image, (int(image.shape[1]/2),int(image.shape[0]/2)), center, color, 1)
     cv2.imshow("Draw Payloads", image)
     cv2.waitKey(0)
