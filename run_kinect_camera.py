@@ -1,16 +1,26 @@
 # Run the Kinect camera
-from cv2 import WINDOW_NORMAL
 import freenect
 import cv2
 from matplotlib.colors import rgb2hex
 import numpy as np
+# import OpenNI
+# import OpenNI2
+from primesense import openni2
+
+# OpenNI.toggleImageAutoExposure()
+# OpenNI2.toggleImageAutoExposure()
+# exposure = -1
+# openni::CameraSettings* pCamSettings = pStreamImage.getCameraSettings()
+# if (pCamSettings):
+#     exposure = pCamSettings.getExposure()
+
 
 def main():
     print("Starting the Kinect Camera")
     rgb_window_name = "RGB Video Feed"
     depth_window_name = "Depth Video Feed"
-    cv2.namedWindow(rgb_window_name, WINDOW_NORMAL)
-    cv2.namedWindow(depth_window_name, WINDOW_NORMAL)
+    cv2.namedWindow(rgb_window_name, cv2.WINDOW_NORMAL)
+    cv2.namedWindow(depth_window_name, cv2.WINDOW_NORMAL)
 
     while True:
         # Get the RGB image from the Kinect
@@ -34,10 +44,53 @@ def main():
             break
         #cv2.waitKey(0)
 
+def test():
+    # openni2.initialize("./Redist")     # can also accept the path of the OpenNI redistribution
+    # openni2.initialize("/home/user/code/OpenNI/Platform/Linux/CreateRedist/Redist_OpenNI.py")     # can also accept the path of the OpenNI redistribution
+    # openni2.initialize("/home/user/code/OpenNI/Platform/Linux/Bin/x64-Release/")     # can also accept the path of the OpenNI redistribution
+    openni2.initialize("/home/user/code/OpenNI-Linux-x64-2.2.0.33/OpenNI-Linux-x64-2.2/Redist/")     # can also accept the path of the OpenNI redistribution
+    # openni2.initialize("/home/user/code/OpenNI2/Packaging/Linux/Redist")     # can also accept the path of the OpenNI redistribution
+    # openni2.initialize()     # can also accept the path of the OpenNI redistribution
+
+    dev = openni2.Device.open_any()
+    a = openni2.CameraSettings(dev).auto_exposure
+    b = openni2.CameraSettings().auto_white_balance
+    c = openni2.CameraSettings().exposure
+    d = openni2.CameraSettings().gain
+    e = openni2.CameraSettings().set_auto_exposure(-1)
+    f = openni2.CameraSettings().exposure
+    g = openni2.CameraSettings().gain
+    h = openni2.CameraSettings().set_auto_white_balance()
+    i = openni2.CameraSettings().set_gain()
+
+
+    depth_stream = dev.create_depth_stream()
+    depth_stream.start()
+
+    while(True):
+
+        frame = depth_stream.read_frame()
+        frame_data = frame.get_buffer_as_uint16()
+
+        img = np.frombuffer(frame_data, dtype=np.uint16)
+        img.shape = (1, 480, 640)
+        img = np.concatenate((img, img, img), axis=0)
+        img = np.swapaxes(img, 0, 2)
+        img = np.swapaxes(img, 0, 1)
+
+        cv2.imshow("image", img)
+        cv2.waitKey(34)
+
+
+    depth_stream.stop()
+    openni2.unload()
+
 def close_camera():
     cv2.destroyAllWindows()
     print("Closed Video Capture")
 
 if __name__ == "__main__":
-    main()
+    # main()
+    test()
     close_camera()
+
