@@ -27,7 +27,7 @@ model.agnostic = False            # NMS class-agnostic - Model uses the foregrou
 model.multi_label = False         # NMS multiple labels per box
 model.classes = None              # (optional list) Filter by class, i.e. = [0, 15, 16] for COCO persons, cats and dogs
 model.max_det = 6                 # Maximum number of detections per image
-# amp = False               # Automatic Mixed Precision (AMP) inference - Applicable calculations are computed in 16-bit precision instead of 32-bit precision
+# amp = False                     # Automatic Mixed Precision (AMP) inference - Applicable calculations are computed in 16-bit precision instead of 32-bit precision
 model.amp = True                  # Speeds up inference process
 
 

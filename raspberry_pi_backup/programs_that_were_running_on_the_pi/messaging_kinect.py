@@ -24,15 +24,22 @@ def recv_msg(socket):
     message = pickle.loads(data)
     return message
 
-def client_send(client, message, recieve=False):
+# Linux controls sockets
+# Tell it to reuse socket address
+# Open client socket
+# Send to server socket
+# Recieve message
+# Close client socket
+def client_send(client, message, receive=False):
     try:
+        # Use with to open and automatically close the socket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as local:
             #local.settimeout(0.01)
             local.connect(('localhost', 8090))
             send_message( (client, message), local)
-            if recieve:
+            if receive:
                 return recv_msg(local)
     except:
         print("comms error")
-        if recieve:
+        if receive:
             return None

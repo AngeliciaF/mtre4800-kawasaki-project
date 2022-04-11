@@ -5,7 +5,6 @@ from pymodbus.datastore import ModbusSequentialDataBlock
 from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
 from twisted.internet.task import LoopingCall
 import logging
-
 import messaging
 
 '''
@@ -17,6 +16,10 @@ import messaging
 6 = gripper away
 7 = no payloads
 '''
+
+
+# SCADA server
+# Goes straight to SCADA from modbus
 
 logging.basicConfig()
 log = logging.getLogger()

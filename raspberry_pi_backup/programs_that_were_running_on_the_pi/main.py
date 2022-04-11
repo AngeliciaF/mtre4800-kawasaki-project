@@ -14,6 +14,7 @@ import multiprocessing
 import math
 from copy import deepcopy
 from math import sqrt
+
 '''
 x = numpy.zeros((3,15,20))
 x1 = numpy.reshape(x[0], (1,300))
