@@ -77,6 +77,7 @@ import time
 import cv2
 import numpy as np
 import freenect
+# from freenect import 
 
 global GLOBAL_DEPTH_MAP
 
@@ -258,8 +259,8 @@ while flag:
     
     # min_contour_area = int(input("min_contour_area:"))
     # max_contour_area = int(input("max_contour_area:"))
-    min_contour_area = 4500 #3000 #4000
-    max_contour_area = 25000 #75000 #400000
+    min_contour_area = 4500 #3000 4000
+    max_contour_area = 25500 #27000 75000 400000
     for c in contours:
         contour_area = cv2.contourArea(c, False)
         # contour_area = cv2.contourArea(c,True)
@@ -342,9 +343,11 @@ while flag:
 
         gdepth = gdepth[gdepth > minrange]
 
-        gdepth_mins = np.partition(gdepth,50)[:50] #sample 100 closest points
+        # TODO: The program crahes due to an index out of bounds error 
+        #       when the gripper picks up the white box
+        ###gdepth_mins = np.partition(gdepth,50)[:50] #sample 100 closest points
 
-        print(gdepth_mins,gdepth.shape)
+        ###print(gdepth_mins,gdepth.shape)
 
         print("contour_area", contour_area_list[index])
         ###print("estimated distance:",np.mean(gdepth_mins)) #avg closest points for approx distance
