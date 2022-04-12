@@ -3,10 +3,13 @@ import freenect
 import cv2
 from matplotlib.colors import rgb2hex
 import numpy as np
+# cdef extern from "Utility.h":
+# import Utility.h
+# import FreenectDriver
 # import OpenNI
 # import OpenNI2
 # from primesense import openni2
-from openni import openni2
+###from openni import openni2
 
 # OpenNI.toggleImageAutoExposure()
 # OpenNI2.toggleImageAutoExposure()
@@ -23,7 +26,8 @@ def main():
     cv2.namedWindow(rgb_window_name, cv2.WINDOW_NORMAL)
     cv2.namedWindow(depth_window_name, cv2.WINDOW_NORMAL)
 
-    while True:
+    count = 0
+    while count < 10000:
         # Get the RGB image from the Kinect
         rgb_image, _ = freenect.sync_get_video()
         rgb_image = rgb_image.astype(np.uint8)
@@ -43,6 +47,8 @@ def main():
         # path = str(f'/home/user/code/mtre4800-kawasaki-project/pixel_to_mm_ratio1.jpg')
         # cv2.imwrite(path, bgr_image)
 
+        count += 1
+        print(count)
         # End live video feed with 'q' or Esc
         if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == 27:
             break
@@ -86,9 +92,11 @@ def test():
         cv2.imshow("image", img)
         cv2.waitKey(0)
 
-
     depth_stream.stop()
     openni2.unload()
+
+def test2():
+    freenect.freenect_set_flag()
 
 def close_camera():
     cv2.destroyAllWindows()
@@ -97,5 +105,6 @@ def close_camera():
 if __name__ == "__main__":
     main()
     # test()
+    # test2()
     close_camera()
 
