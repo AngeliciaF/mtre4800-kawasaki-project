@@ -3,9 +3,13 @@ import freenect
 import cv2
 from matplotlib.colors import rgb2hex
 import numpy as np
+# cdef extern from "Utility.h":
+# import Utility.h
+# import FreenectDriver
 # import OpenNI
 # import OpenNI2
-from primesense import openni2
+# from primesense import openni2
+###from openni import openni2
 
 # OpenNI.toggleImageAutoExposure()
 # OpenNI2.toggleImageAutoExposure()
@@ -22,7 +26,8 @@ def main():
     cv2.namedWindow(rgb_window_name, cv2.WINDOW_NORMAL)
     cv2.namedWindow(depth_window_name, cv2.WINDOW_NORMAL)
 
-    while True:
+    count = 0
+    while count < 10000:
         # Get the RGB image from the Kinect
         rgb_image, _ = freenect.sync_get_video()
         rgb_image = rgb_image.astype(np.uint8)
@@ -38,13 +43,19 @@ def main():
         # Display RGB and Depth Image
         cv2.imshow(rgb_window_name, bgr_image)
         cv2.imshow(depth_window_name, depth_image)
+        # cv2.imshow("image", bgr_image)
+        # path = str(f'/home/user/code/mtre4800-kawasaki-project/pixel_to_mm_ratio1.jpg')
+        # cv2.imwrite(path, bgr_image)
 
+        count += 1
+        print(count)
         # End live video feed with 'q' or Esc
         if cv2.waitKey(1) == ord('q') or cv2.waitKey(1) == 27:
             break
         #cv2.waitKey(0)
 
 def test():
+    # OpenNI.
     # openni2.initialize("./Redist")     # can also accept the path of the OpenNI redistribution
     # openni2.initialize("/home/user/code/OpenNI/Platform/Linux/CreateRedist/Redist_OpenNI.py")     # can also accept the path of the OpenNI redistribution
     # openni2.initialize("/home/user/code/OpenNI/Platform/Linux/Bin/x64-Release/")     # can also accept the path of the OpenNI redistribution
@@ -53,11 +64,11 @@ def test():
     # openni2.initialize()     # can also accept the path of the OpenNI redistribution
 
     dev = openni2.Device.open_any()
-    a = openni2.CameraSettings(dev).auto_exposure
-    b = openni2.CameraSettings().auto_white_balance
-    c = openni2.CameraSettings().exposure
-    d = openni2.CameraSettings().gain
-    e = openni2.CameraSettings().set_auto_exposure(-1)
+    # a = openni2.CameraSettings().auto_exposure
+    # b = openni2.CameraSettings().auto_white_balance
+    # c = openni2.CameraSettings().exposure
+    # d = openni2.CameraSettings().gain
+    e = openni2.CameraSettings.set_auto_exposure()
     f = openni2.CameraSettings().exposure
     g = openni2.CameraSettings().gain
     h = openni2.CameraSettings().set_auto_white_balance()
@@ -79,18 +90,21 @@ def test():
         img = np.swapaxes(img, 0, 1)
 
         cv2.imshow("image", img)
-        cv2.waitKey(34)
-
+        cv2.waitKey(0)
 
     depth_stream.stop()
     openni2.unload()
+
+def test2():
+    freenect.freenect_set_flag()
 
 def close_camera():
     cv2.destroyAllWindows()
     print("Closed Video Capture")
 
 if __name__ == "__main__":
-    # main()
-    test()
+    main()
+    # test()
+    # test2()
     close_camera()
 
