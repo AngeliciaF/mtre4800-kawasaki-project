@@ -188,8 +188,17 @@ while flag:
     # mask = cv2.inRange(gray, lower_range, upper_range)
     # lower_mask = int(input("lower_mask: "))
     # upper_mask = int(input("upper_mask: "))
-    lower_mask = 110 #40  100 100
-    upper_mask = 215 #130 170 155
+    payload_type = 0
+    # if payload.type == 0: # Black Box
+    if payload_type == 0: # Black Box
+        lower_mask = 70 #110 40  100 100
+        upper_mask = 170 #215 130 170 155
+    elif payload_type == 1: # Orange Bucket
+        lower_mask = 200 #110 40  100 100
+        upper_mask = 250 #215 130 170 155
+    elif payload_type == 2: # White Box
+        lower_mask = 70 #110 40  100 100
+        upper_mask = 130 #215 130 170 155
     mask = cv2.inRange(blurry, lower_mask, upper_mask)
     # mask = cv2.inRange(blurry, 100, 155)
     # Black     *5-10,90            90,200          100,155
@@ -259,8 +268,8 @@ while flag:
     
     # min_contour_area = int(input("min_contour_area:"))
     # max_contour_area = int(input("max_contour_area:"))
-    min_contour_area = 4500 #3000 4000
-    max_contour_area = 25500 #27000 75000 400000
+    min_contour_area = 25000 #4500 3000 4000
+    max_contour_area = 75500 #25500 27000 75000 400000
     for c in contours:
         contour_area = cv2.contourArea(c, False)
         # contour_area = cv2.contourArea(c,True)
@@ -320,7 +329,7 @@ while flag:
         box_center = (int((x1+y1)/2),int((x2+y2)/2))
         cv2.rectangle(final, (x1, x2), (y1, y2), (0, 255, 0), 2)
     
-        print(x1,x2,y1,y2)
+        # print(x1,x2,y1,y2)
 
         xmin = x1
         ymin = x2
@@ -386,7 +395,7 @@ while flag:
     # -1 signifies drawing all contours
     # cv2.drawContours(rgb_image, contours, -1, (255, 0, 0), 3)
     # cv2.imshow('Contours', rgb_image)
-    # cv2.waitKey(0)
+    cv2.waitKey(100)
 
     # flag: Used to stop while loop after 1 run/pass
     # flag = False
