@@ -1,12 +1,11 @@
-# Run the Kinect camera
+# Run the Kinect camera (RGB and Depth)
 import freenect
 import cv2
-from matplotlib.colors import rgb2hex
 import numpy as np
 # import OpenNI
 # import OpenNI2
 # from primesense import openni2
-from openni import openni2
+# from openni import openni2
 
 # OpenNI.toggleImageAutoExposure()
 # OpenNI2.toggleImageAutoExposure()
@@ -26,6 +25,7 @@ def main():
     while True:
         # Get the RGB image from the Kinect
         rgb_image, _ = freenect.sync_get_video()
+        cv2.rotate(rgb_image, cv2.ROTATE_180)
         rgb_image = rgb_image.astype(np.uint8)
         bgr_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
         print(bgr_image.shape)
